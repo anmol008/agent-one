@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Plus, Shield, User, UserCheck, Edit } from "lucide-react";
+import { Plus, Shield, User, UserCheck, Edit, Trash2, UserPlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import UserDetailModal from "@/components/users/UserDetailModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface UserData {
   id: string;
@@ -55,15 +60,94 @@ const mockUsers: UserData[] = [
 ];
 
 const Users = () => {
-  const [users] = useState<UserData[]>(mockUsers);
+  const [users, setUsers] = useState<UserData[]>(mockUsers);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [newUserOpen, setNewUserOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
+  const [newUser, setNewUser] = useState({
+    name: "",
+    email: "",
+    role: "User"
+  });
   const { toast } = useToast();
 
   const handleNewUser = () => {
+    setNewUserOpen(true);
+  };
+
+  const handleCreateUser = () => {
+    if (!newUser.name || !newUser.email) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide both name and email.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const user: UserData = {
+      id: `user-${Math.random().toString(36).substring(2, 10)}`,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      status: "active",
+      lastActive: new Date().toISOString(),
+      avatar: "/placeholder.svg"
+    };
+
+    setUsers([...users, user]);
+    setNewUser({
+      name: "",
+      email: "",
+      role: "User"
+    });
+    setNewUserOpen(false);
+
     toast({
-      title: "Coming Soon",
-      description: "New user creation will be available soon.",
+      title: "User Created",
+      description: `${user.name} has been added successfully.`,
+    });
+  };
+
+  const handleDeleteUser = (user: UserData) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteUser = () => {
+    if (!userToDelete) return;
+    
+    const updatedUsers = users.filter(user => user.id !== userToDelete.id);
+    setUsers(updatedUsers);
+    
+    toast({
+      title: "User Deleted",
+      description: `${userToDelete.name} has been removed.`,
+    });
+    
+    setDeleteDialogOpen(false);
+    setUserToDelete(null);
+  };
+
+  const toggleUserStatus = (userId: string) => {
+    const updatedUsers = users.map(user => {
+      if (user.id === userId) {
+        const newStatus = user.status === "active" ? "inactive" : "active";
+        return { ...user, status: newStatus };
+      }
+      return user;
+    });
+    
+    setUsers(updatedUsers);
+    
+    const user = users.find(u => u.id === userId);
+    const newStatus = user?.status === "active" ? "inactive" : "active";
+    
+    toast({
+      title: "User Status Updated",
+      description: `${user?.name} is now ${newStatus}.`,
     });
   };
 
@@ -147,23 +231,31 @@ const Users = () => {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.role}</TableCell>
                   <TableCell>
-                    <span
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         user.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
+                          ? "bg-green-100 text-green-800 hover:bg-green-200"
+                          : "bg-red-100 text-red-800 hover:bg-red-200"
                       }`}
+                      onClick={() => toggleUserStatus(user.id)}
                     >
                       {user.status}
-                    </span>
+                    </Button>
                   </TableCell>
                   <TableCell>
                     {new Date(user.lastActive).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" onClick={() => { setSelectedUser(user); setDetailOpen(true); }}>
-                      <Edit className="w-4 h-4 mr-1" /> Detail
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => { setSelectedUser(user); setDetailOpen(true); }}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user)}>
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -171,7 +263,78 @@ const Users = () => {
           </Table>
         </CardContent>
       </Card>
+      
+      {/* User Detail Modal */}
       <UserDetailModal user={selectedUser} open={detailOpen} onClose={() => setDetailOpen(false)} />
+      
+      {/* New User Modal */}
+      <Dialog open={newUserOpen} onOpenChange={setNewUserOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New User</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input 
+                id="name" 
+                value={newUser.name} 
+                onChange={e => setNewUser({...newUser, name: e.target.value})}
+                placeholder="Full Name" 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                value={newUser.email} 
+                onChange={e => setNewUser({...newUser, email: e.target.value})}
+                placeholder="user@example.com" 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select value={newUser.role} onValueChange={value => setNewUser({...newUser, role: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="Manager">Manager</SelectItem>
+                  <SelectItem value="User">User</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewUserOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateUser}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Create User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the user 
+              "{userToDelete?.name}" and remove their data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteUser} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

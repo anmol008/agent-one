@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
-import { Copy } from "lucide-react";
+import { Copy, Check, Loader2, Save } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -21,12 +23,77 @@ const Settings = () => {
     twoFactor: false,
     apiAccess: true,
   });
+  const [apiKey, setApiKey] = useState("sk_test_51KjH...");
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [justCopied, setJustCopied] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = (section?: string) => {
+    setIsSaving(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsSaving(false);
+      
+      toast({
+        title: "Settings saved",
+        description: `Your ${section ? section + " settings" : "settings"} have been saved successfully.`,
+      });
+      
+      // Clear password fields after save in security section
+      if (section === "security") {
+        setCurrentPassword("");
+        setNewPassword("");
+      }
+    }, 1000);
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(apiKey);
+    setJustCopied(true);
+    
+    setTimeout(() => {
+      setJustCopied(false);
+    }, 2000);
+    
     toast({
-      title: "Settings saved",
-      description: "Your settings have been saved successfully.",
+      title: "API Key Copied",
+      description: "API key has been copied to clipboard",
     });
+  };
+
+  const handleRegenerateKey = () => {
+    setIsResetDialogOpen(true);
+  };
+
+  const confirmRegenerateKey = () => {
+    // Generate a new mock API key
+    const newKey = "sk_test_" + Math.random().toString(36).substring(2, 15) + "...";
+    setApiKey(newKey);
+    setIsResetDialogOpen(false);
+    
+    toast({
+      title: "API Key Regenerated",
+      description: "Your API key has been regenerated successfully.",
+    });
+  };
+
+  const handleSaveWebhook = () => {
+    setIsSaving(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsSaving(false);
+      
+      toast({
+        title: "Webhook URL Saved",
+        description: "Your webhook URL has been updated successfully.",
+      });
+    }, 1000);
   };
 
   return (
@@ -57,17 +124,29 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" defaultValue={user?.name || "John Doe"} readOnly />
+                <Input id="name" defaultValue={user?.name || "John Doe"} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue={user?.email || "john@example.com"} readOnly />
+                <Input id="email" type="email" defaultValue={user?.email || "john@example.com"} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="company">Company</Label>
-                <Input id="company" defaultValue="Acme Inc" readOnly />
+                <Input id="company" defaultValue="Acme Inc" />
               </div>
-              <Button onClick={handleSave}>Save Changes</Button>
+              <Button onClick={() => handleSave("general")} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -111,7 +190,19 @@ const Settings = () => {
                   }
                 />
               </div>
-              <Button onClick={handleSave}>Save Preferences</Button>
+              <Button onClick={() => handleSave("notification")} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Preferences
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -147,13 +238,38 @@ const Settings = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="current-password">Current Password</Label>
-                <Input id="current-password" type="password" />
+                <Input 
+                  id="current-password" 
+                  type="password" 
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" type="password" />
+                <Input 
+                  id="new-password" 
+                  type="password" 
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
               </div>
-              <Button onClick={handleSave}>Update Security Settings</Button>
+              <Button 
+                onClick={() => handleSave("security")} 
+                disabled={isSaving || (!currentPassword && newPassword) || (currentPassword && !newPassword)}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Update Security Settings
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -172,31 +288,64 @@ const Settings = () => {
                 <div className="flex gap-2">
                   <Input
                     readOnly
-                    value="sk_test_51KjH..."
-                    type="password"
+                    value={apiKey}
+                    type={showApiKey ? "text" : "password"}
+                    onClick={() => setShowApiKey(!showApiKey)}
                   />
-                  <Button variant="outline" onClick={() => {navigator.clipboard.writeText("sk_test_51KjH...")}}>
-                    <Copy className="w-4 h-4 mr-1" /> Copy
+                  <Button variant="outline" onClick={handleCopy}>
+                    {justCopied ? (
+                      <>
+                        <Check className="w-4 h-4 mr-1" /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-1" /> Copy
+                      </>
+                    )}
                   </Button>
-                  <Button variant="outline" onClick={() => toast({
-                    title: "API Key Regenerate",
-                    description: "This would regenerate the API key in a real app."
-                  })}>Regenerate</Button>
+                  <Button variant="outline" onClick={handleRegenerateKey}>Regenerate</Button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Keep this key secret. Do not share it with anyone.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>Webhook URL</Label>
                 <div className="flex gap-2">
                   <Input
                     placeholder="https://your-domain.com/webhook"
+                    value={webhookUrl}
+                    onChange={(e) => setWebhookUrl(e.target.value)}
                   />
-                  <Button>Save</Button>
+                  <Button onClick={handleSaveWebhook} disabled={!webhookUrl}>Save</Button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  We'll send event notifications to this URL.
+                </p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* Regenerate API Key confirmation dialog */}
+      <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Regenerate API Key?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will invalidate your current API key. Any applications using
+              this API key will stop working until you update them with the new key.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRegenerateKey}>
+              Regenerate
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
