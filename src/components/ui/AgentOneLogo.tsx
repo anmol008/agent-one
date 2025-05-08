@@ -18,36 +18,12 @@ const AgentOneLogo = ({ size = 40, className, variant = "default" }: AgentOneLog
       {variant === "default" ? (
         // Full logo with text and icon
         <div className="flex items-center">
-          <div 
-            className="relative"
-            style={{ width: size, height: size }}
-          >
-            <div className="absolute inset-0">
-              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <circle cx="30" cy="30" r="5" fill="currentColor" fillOpacity="0.7" />
-                <circle cx="60" cy="25" r="5" fill="currentColor" fillOpacity="0.7" />
-                <circle cx="85" cy="50" r="5" fill="currentColor" fillOpacity="0.7" />
-                <circle cx="65" cy="75" r="5" fill="currentColor" fillOpacity="0.7" />
-                <circle cx="30" cy="70" r="5" fill="currentColor" fillOpacity="0.7" />
-                <circle cx="15" cy="50" r="5" fill="currentColor" fillOpacity="0.7" />
-                <line x1="30" y1="30" x2="60" y2="25" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-                <line x1="60" y1="25" x2="85" y2="50" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-                <line x1="85" y1="50" x2="65" y2="75" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-                <line x1="65" y1="75" x2="30" y2="70" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-                <line x1="30" y1="70" x2="15" y2="50" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-                <line x1="15" y1="50" x2="30" y2="30" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-                <line x1="30" y1="30" x2="65" y2="75" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-                <line x1="30" y1="70" x2="60" y2="25" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-                <line x1="15" y1="50" x2="85" y2="50" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-              </svg>
-            </div>
-          </div>
-          <span 
-            className="ml-2 tracking-wider uppercase font-bold"
-            style={{ fontSize: `${size / 2}px` }}
-          >
-            AGENT ONE
-          </span>
+          <img 
+            src="/lovable-uploads/e2a2616f-9ef6-4227-bad9-420362a39663.png" 
+            alt="Agent One Logo" 
+            style={{ height: `${size}px` }}
+            className="h-full"
+          />
         </div>
       ) : (
         // Icon only for smaller displays
@@ -55,25 +31,11 @@ const AgentOneLogo = ({ size = 40, className, variant = "default" }: AgentOneLog
           className="relative"
           style={{ width: size, height: size }}
         >
-          <div className="absolute inset-0">
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-              <circle cx="30" cy="30" r="5" fill="currentColor" fillOpacity="0.7" />
-              <circle cx="60" cy="25" r="5" fill="currentColor" fillOpacity="0.7" />
-              <circle cx="85" cy="50" r="5" fill="currentColor" fillOpacity="0.7" />
-              <circle cx="65" cy="75" r="5" fill="currentColor" fillOpacity="0.7" />
-              <circle cx="30" cy="70" r="5" fill="currentColor" fillOpacity="0.7" />
-              <circle cx="15" cy="50" r="5" fill="currentColor" fillOpacity="0.7" />
-              <line x1="30" y1="30" x2="60" y2="25" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-              <line x1="60" y1="25" x2="85" y2="50" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-              <line x1="85" y1="50" x2="65" y2="75" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-              <line x1="65" y1="75" x2="30" y2="70" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-              <line x1="30" y1="70" x2="15" y2="50" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-              <line x1="15" y1="50" x2="30" y2="30" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-              <line x1="30" y1="30" x2="65" y2="75" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-              <line x1="30" y1="70" x2="60" y2="25" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-              <line x1="15" y1="50" x2="85" y2="50" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" />
-            </svg>
-          </div>
+          <img 
+            src="/lovable-uploads/39751f20-ba1d-46bc-92bb-04ad8146598f.png" 
+            alt="Agent One Icon" 
+            className="h-full w-full object-contain"
+          />
         </div>
       )}
     </div>

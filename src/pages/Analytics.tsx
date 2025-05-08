@@ -15,22 +15,18 @@ import {
   ResponsiveContainer,
   PieChart as RechartPie,
   Pie,
-  Cell
+  Cell,
+  Legend
 } from "recharts";
 import { mockAnalyticsData } from "@/data/mockData";
 import { useTheme } from "@/context/ThemeContext";
 import DraggableChartContainer from "@/components/charts/DraggableChartContainer";
-
-const mockAgentUsage = [
-  { name: "AI Assistant", value: 400 },
-  { name: "Data Processor", value: 300 },
-  { name: "Content Generator", value: 200 },
-  { name: "Research Agent", value: 100 }
-];
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const COLORS = {
-  light: ["#9b87f5", "#7E69AB", "#6163FF", "#B085F5"],
-  dark: ["#A39BF0", "#8E7FC1", "#7A73B5", "#6C67A9"]
+  light: ["#9b87f5", "#7E69AB", "#6163FF", "#B085F5", "#F97316", "#0EA5E9", "#D946EF"],
+  dark: ["#A39BF0", "#8E7FC1", "#7A73B5", "#6C67A9", "#D946EF", "#0EA5E9", "#F97316"]
 };
 
 const StatsCard = ({ title, value, icon: Icon, trend }: { 
@@ -67,7 +63,86 @@ const Analytics = () => {
     agentUsage: { order: 3 }
   });
   
-  const pieColors = theme === "dark" ? COLORS.dark : COLORS.light;
+  const [chartTypes, setChartTypes] = useState({
+    dailyRequests: "bar",
+    requestTrends: "line",
+    agentUsage: "pie"
+  });
+  
+  const colors = theme === "dark" ? COLORS.dark : COLORS.light;
+
+  const handleChartTypeChange = (chartId: string, type: string) => {
+    setChartTypes(prev => ({
+      ...prev,
+      [chartId]: type
+    }));
+  };
+
+  const renderChart = (chartId: string, data: any[], dataKey: string, title: string) => {
+    const chartType = chartTypes[chartId as keyof typeof chartTypes];
+    
+    return (
+      <DraggableChartContainer title={title}>
+        <div className="flex justify-end mb-4">
+          <Select 
+            value={chartType} 
+            onValueChange={(value) => handleChartTypeChange(chartId, value)}
+          >
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Chart Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="bar">Bar Chart</SelectItem>
+              <SelectItem value="line">Line Chart</SelectItem>
+              <SelectItem value="pie">Pie Chart</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="h-[350px]">
+          <ResponsiveContainer width="100%" height="100%">
+            {chartType === "bar" ? (
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#334155" : "#e2e8f0"} />
+                <XAxis dataKey="date" stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
+                <YAxis stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
+                <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff", borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }} />
+                <Legend />
+                <Bar dataKey={dataKey} fill={colors[0]} name="Requests" />
+              </BarChart>
+            ) : chartType === "line" ? (
+              <RechartLine data={data}>
+                <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#334155" : "#e2e8f0"} />
+                <XAxis dataKey="date" stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
+                <YAxis stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
+                <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff", borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }} />
+                <Legend />
+                <Line type="monotone" dataKey={dataKey} stroke={colors[0]} strokeWidth={2} name="Requests" />
+              </RechartLine>
+            ) : (
+              <RechartPie>
+                <Pie
+                  data={mockAnalyticsData.agentUsage}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={true}
+                  outerRadius={130}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {mockAnalyticsData.agentUsage.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff", borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }} />
+                <Legend />
+              </RechartPie>
+            )}
+          </ResponsiveContainer>
+        </div>
+      </DraggableChartContainer>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -103,93 +178,35 @@ const Analytics = () => {
           trend="+12.5% from last month"
         />
       </div>
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="requests">Requests</TabsTrigger>
-          <TabsTrigger value="usage">Usage</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            <DraggableChartContainer title="Daily Requests">
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={mockAnalyticsData.requestsOverTime}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#334155" : "#e2e8f0"} />
-                    <XAxis dataKey="date" stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
-                    <YAxis stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
-                    <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff", borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }} />
-                    <Bar dataKey="requests" fill={theme === "dark" ? "#A39BF0" : "#9b87f5"} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </DraggableChartContainer>
-          </div>
-        </TabsContent>
-        <TabsContent value="requests" className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            <DraggableChartContainer title="Request Trends">
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartLine data={mockAnalyticsData.requestsOverTime}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#334155" : "#e2e8f0"} />
-                    <XAxis dataKey="date" stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
-                    <YAxis stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
-                    <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff", borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }} />
-                    <Line type="monotone" dataKey="requests" stroke={theme === "dark" ? "#A39BF0" : "#9b87f5"} strokeWidth={2} />
-                  </RechartLine>
-                </ResponsiveContainer>
-              </div>
-            </DraggableChartContainer>
-          </div>
-        </TabsContent>
-        <TabsContent value="usage" className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            <DraggableChartContainer title="Agent Usage Distribution">
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartPie>
-                    <Pie
-                      data={mockAnalyticsData.agentUsage}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={150}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {mockAnalyticsData.agentUsage.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff", borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }} />
-                  </RechartPie>
-                </ResponsiveContainer>
-              </div>
-            </DraggableChartContainer>
-          </div>
-        </TabsContent>
-      </Tabs>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {renderChart("dailyRequests", mockAnalyticsData.requestsOverTime, "requests", "Daily Requests")}
+        {renderChart("requestTrends", mockAnalyticsData.requestsOverTime, "requests", "Request Trends")}
+      </div>
+      
+      <div className="grid grid-cols-1 gap-4">
+        {renderChart("agentUsage", mockAnalyticsData.agentUsage, "value", "Agent Usage Distribution")}
+      </div>
+      
       <Card>
         <CardHeader>
           <CardTitle>Performance Statistics</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="p-4 border rounded-lg">
+            <div className={cn("p-4 border rounded-lg", theme === "dark" ? "border-gray-700" : "border-gray-200")}>
               <h3 className="text-sm font-medium text-muted-foreground">Average Response Time</h3>
               <p className="text-2xl font-bold">{mockAnalyticsData.avgResponseTime}s</p>
             </div>
-            <div className="p-4 border rounded-lg">
+            <div className={cn("p-4 border rounded-lg", theme === "dark" ? "border-gray-700" : "border-gray-200")}>
               <h3 className="text-sm font-medium text-muted-foreground">Error Rate</h3>
               <p className="text-2xl font-bold">{(mockAnalyticsData.errorRate * 100).toFixed(1)}%</p>
             </div>
-            <div className="p-4 border rounded-lg">
+            <div className={cn("p-4 border rounded-lg", theme === "dark" ? "border-gray-700" : "border-gray-200")}>
               <h3 className="text-sm font-medium text-muted-foreground">Total Requests</h3>
               <p className="text-2xl font-bold">{mockAnalyticsData.totalRequests.toLocaleString()}</p>
             </div>
-            <div className="p-4 border rounded-lg">
+            <div className={cn("p-4 border rounded-lg", theme === "dark" ? "border-gray-700" : "border-gray-200")}>
               <h3 className="text-sm font-medium text-muted-foreground">Active Users</h3>
               <p className="text-2xl font-bold">{mockAnalyticsData.activeUsers}</p>
             </div>

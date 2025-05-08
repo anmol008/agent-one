@@ -34,8 +34,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
-    // In a real app, you would make an API call to authenticate the user
-    // For this demo, we'll just check if the email exists in our mock data
+    // For this demo, we'll accept password "1234" and check if the email exists in our mock data
+    if (password !== "1234") {
+      toast.error('Invalid password. Please try again.');
+      setIsLoading(false);
+      return false;
+    }
+    
+    // Find user by email
     const foundUser = mockUsers.find(u => u.email === email);
     
     // Simulate network delay

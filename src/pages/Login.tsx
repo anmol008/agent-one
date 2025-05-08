@@ -7,8 +7,8 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
-import AgentOneLogo from "@/components/ui/AgentOneLogo";
 import { Eye, EyeOff } from "lucide-react";
+import ThemeSwitcher from "@/components/layout/ThemeSwitcher";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -64,7 +64,7 @@ const Login = () => {
     }
     
     try {
-      const success = await login(demoEmail, "password");
+      const success = await login(demoEmail, "1234");
       if (success) {
         toast.success(`Welcome! You've logged in as a ${role} user.`);
         navigate("/dashboard");
@@ -79,11 +79,18 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeSwitcher />
+      </div>
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <AgentOneLogo size={60} />
+            <img 
+              src="/lovable-uploads/e2a2616f-9ef6-4227-bad9-420362a39663.png" 
+              alt="Agent One Logo" 
+              className="h-16"
+            />
           </div>
           <h1 className="text-3xl font-bold">AgentOne Platform</h1>
           <p className="text-muted-foreground mt-2">
@@ -139,7 +146,7 @@ const Login = () => {
               
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full bg-primary hover:bg-primary/90" 
                 disabled={isLoading}
               >
                 {isLoading ? "Logging in..." : "Login"}
@@ -190,8 +197,7 @@ const Login = () => {
             
             <div className="text-center w-full">
               <p className="text-xs text-muted-foreground">
-                This is a demo application. No actual authentication is performed.
-                <br />Click any demo login button to access the platform.
+                This is a demo application. Use password "1234" with any demo email.
               </p>
             </div>
           </CardFooter>
