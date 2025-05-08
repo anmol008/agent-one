@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Integration, IntegrationType } from "@/types";
 
 // Map integration type to icon
 const typeIcon = {
@@ -24,7 +25,7 @@ const Integrations = () => {
   const [newIntegration, setNewIntegration] = useState({
     name: "",
     description: "",
-    type: "",
+    type: "data" as IntegrationType,
     provider: "",
     authType: "API Key"
   });
@@ -34,7 +35,7 @@ const Integrations = () => {
     setShowNewIntegrationModal(true);
   };
 
-  const handleToggle = (id) => {
+  const handleToggle = (id: string) => {
     setIntegrations(integrations.map(integration => 
       integration.id === id 
         ? { ...integration, enabled: !integration.enabled } 
@@ -59,7 +60,7 @@ const Integrations = () => {
       return;
     }
 
-    const newIntegrationObj = {
+    const newIntegrationObj: Integration = {
       id: `int-${Math.random().toString(36).substring(2, 10)}`,
       ...newIntegration,
       enabled: false
@@ -69,7 +70,7 @@ const Integrations = () => {
     setNewIntegration({
       name: "",
       description: "",
-      type: "",
+      type: "data" as IntegrationType,
       provider: "",
       authType: "API Key"
     });
@@ -169,7 +170,7 @@ const Integrations = () => {
               <Label htmlFor="type">Integration Type</Label>
               <Select 
                 value={newIntegration.type} 
-                onValueChange={value => setNewIntegration({...newIntegration, type: value})}
+                onValueChange={value => setNewIntegration({...newIntegration, type: value as IntegrationType})}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -26,7 +26,7 @@ export default function UserDetailModal({ user, open, onClose }: UserDetailModal
   const { toast } = useToast();
 
   // Initialize edited user when the modal opens with a user
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       setEditedUser({...user});
     }

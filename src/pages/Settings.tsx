@@ -96,6 +96,11 @@ const Settings = () => {
     }, 1000);
   };
 
+  // Handle click to toggle show/hide API key
+  const toggleShowApiKey = () => {
+    setShowApiKey(!showApiKey);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -290,7 +295,7 @@ const Settings = () => {
                     readOnly
                     value={apiKey}
                     type={showApiKey ? "text" : "password"}
-                    onClick={() => setShowApiKey(!showApiKey)}
+                    onClick={toggleShowApiKey}
                   />
                   <Button variant="outline" onClick={handleCopy}>
                     {justCopied ? (

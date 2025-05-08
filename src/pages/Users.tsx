@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus, Shield, User, UserCheck, Edit, Trash2, UserPlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -135,7 +134,7 @@ const Users = () => {
     const updatedUsers = users.map(user => {
       if (user.id === userId) {
         const newStatus = user.status === "active" ? "inactive" : "active";
-        return { ...user, status: newStatus };
+        return { ...user, status: newStatus as "active" | "inactive" };
       }
       return user;
     });
