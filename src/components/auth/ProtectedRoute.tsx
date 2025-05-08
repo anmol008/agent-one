@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     if (!isLoading && !isAuthenticated) {
       // This is just for demonstration - in a real app, you would redirect to login
       // Auto-login with demo credentials
-      login({ email: 'demo@example.com', password: 'password123' });
+      login({ email: 'demo@example.com', password: 'password123' }, true);
     }
   }, [isLoading, isAuthenticated, login]);
 

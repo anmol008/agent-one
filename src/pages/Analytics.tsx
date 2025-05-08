@@ -1,3 +1,5 @@
+
+import { useState } from "react";
 import { BarChart3, LineChart, PieChart, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -16,12 +18,8 @@ import {
   Cell
 } from "recharts";
 import { mockAnalyticsData } from "@/data/mockData";
-
-const mockDataDaily = Array.from({ length: 7 }, (_, i) => ({
-  day: `Day ${i + 1}`,
-  requests: Math.floor(Math.random() * 1000),
-  users: Math.floor(Math.random() * 100)
-}));
+import { useTheme } from "@/context/ThemeContext";
+import DraggableChartContainer from "@/components/charts/DraggableChartContainer";
 
 const mockAgentUsage = [
   { name: "AI Assistant", value: 400 },
@@ -30,33 +28,47 @@ const mockAgentUsage = [
   { name: "Research Agent", value: 100 }
 ];
 
-const COLORS = ["#9b87f5", "#7E69AB", "#6163FF", "#B085F5"];
-
-const pieColors = ["#9b87f5", "#7E69AB", "#6163FF", "#B085F5"];
+const COLORS = {
+  light: ["#9b87f5", "#7E69AB", "#6163FF", "#B085F5"],
+  dark: ["#A39BF0", "#8E7FC1", "#7A73B5", "#6C67A9"]
+};
 
 const StatsCard = ({ title, value, icon: Icon, trend }: { 
   title: string;
   value: string;
   icon: any;
   trend: string;
-}) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">
-        {title}
-      </CardTitle>
-      <Icon className="h-4 w-4 text-muted-foreground" />
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      <p className="text-xs text-muted-foreground">
-        {trend}
-      </p>
-    </CardContent>
-  </Card>
-);
+}) => {
+  const { theme } = useTheme();
+  
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">
+          {title}
+        </CardTitle>
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className={`text-xs ${trend.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+          {trend}
+        </p>
+      </CardContent>
+    </Card>
+  );
+};
 
 const Analytics = () => {
+  const { theme } = useTheme();
+  const [chartLayouts, setChartLayouts] = useState({
+    dailyRequests: { order: 1 },
+    requestTrends: { order: 2 },
+    agentUsage: { order: 3 }
+  });
+  
+  const pieColors = theme === "dark" ? COLORS.dark : COLORS.light;
+
   return (
     <div className="space-y-6">
       <div>
@@ -98,68 +110,65 @@ const Analytics = () => {
           <TabsTrigger value="usage">Usage</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Daily Requests</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={mockAnalyticsData.requestsOverTime}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="requests" fill="#9b87f5" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 gap-4">
+            <DraggableChartContainer title="Daily Requests">
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={mockAnalyticsData.requestsOverTime}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#334155" : "#e2e8f0"} />
+                    <XAxis dataKey="date" stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
+                    <YAxis stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
+                    <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff", borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }} />
+                    <Bar dataKey="requests" fill={theme === "dark" ? "#A39BF0" : "#9b87f5"} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </DraggableChartContainer>
+          </div>
         </TabsContent>
         <TabsContent value="requests" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Request Trends (Line)</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartLine data={mockAnalyticsData.requestsOverTime}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="requests" stroke="#9b87f5" />
-                </RechartLine>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 gap-4">
+            <DraggableChartContainer title="Request Trends">
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartLine data={mockAnalyticsData.requestsOverTime}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#334155" : "#e2e8f0"} />
+                    <XAxis dataKey="date" stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
+                    <YAxis stroke={theme === "dark" ? "#94a3b8" : "#64748b"} />
+                    <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff", borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }} />
+                    <Line type="monotone" dataKey="requests" stroke={theme === "dark" ? "#A39BF0" : "#9b87f5"} strokeWidth={2} />
+                  </RechartLine>
+                </ResponsiveContainer>
+              </div>
+            </DraggableChartContainer>
+          </div>
         </TabsContent>
         <TabsContent value="usage" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Agent Usage Distribution</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartPie>
-                  <Pie
-                    data={mockAnalyticsData.agentUsage}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={150}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {mockAnalyticsData.agentUsage.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </RechartPie>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 gap-4">
+            <DraggableChartContainer title="Agent Usage Distribution">
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartPie>
+                    <Pie
+                      data={mockAnalyticsData.agentUsage}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={150}
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {mockAnalyticsData.agentUsage.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff", borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }} />
+                  </RechartPie>
+                </ResponsiveContainer>
+              </div>
+            </DraggableChartContainer>
+          </div>
         </TabsContent>
       </Tabs>
       <Card>

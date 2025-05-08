@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import AgentOneLogo from "../ui/AgentOneLogo";
+import ThemeSwitcher from "./ThemeSwitcher";
 
 export const Layout = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -50,6 +51,9 @@ export const Layout = () => {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeSwitcher />
+      </div>
       <main className={cn(
         "flex-1 min-h-screen max-w-full", 
         isMobile ? "p-4 pt-16" : "p-6"
