@@ -1,7 +1,8 @@
 
-import { Button } from "@/components/ui/button";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import AgentOneLogo from "@/components/ui/AgentOneLogo";
 
 const NotFound = () => {
   const location = useLocation();
@@ -14,15 +15,19 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4 text-center">
-      <h1 className="text-6xl font-bold mb-4">404</h1>
-      <p className="text-xl text-muted-foreground mb-8">Page not found</p>
-      <p className="text-muted-foreground max-w-md mb-8">
-        The page you're looking for doesn't exist or has been moved.
-      </p>
-      <Button asChild>
-        <a href="/">Return Home</a>
-      </Button>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="text-center max-w-md">
+        <div className="mx-auto mb-6">
+          <AgentOneLogo size={60} />
+        </div>
+        <h1 className="text-5xl font-bold mb-4">404</h1>
+        <p className="text-xl text-muted-foreground mb-8">
+          Oops! We couldn't find the page you're looking for.
+        </p>
+        <Button asChild size="lg">
+          <Link to="/">Return to Dashboard</Link>
+        </Button>
+      </div>
     </div>
   );
 };
